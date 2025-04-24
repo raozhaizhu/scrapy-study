@@ -1,3 +1,4 @@
+import random
 import scrapy
 from bookscraper.items import BookItem
 
@@ -10,6 +11,25 @@ class BookspiderSpider(scrapy.Spider):
     custom_settings = {
         "FEEDS": {"booksdata.json": {"format": "json", "overwrite": True}},
     }
+
+    user_agent_list = [
+    # Chrome (Windows/Mac)
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    
+    # Firefox
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13.5; rv:125.0) Gecko/20100101 Firefox/125.0",
+    
+    # Safari
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
+    
+    # Edge
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+    
+    # Opera
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 OPR/85.0.4341.72"
+]
 
     def parse(self, response):
         """
@@ -34,7 +54,7 @@ class BookspiderSpider(scrapy.Spider):
                 book_url = "https://books.toscrape.com/" + relative_url
             else:
                 book_url = "https://books.toscrape.com/catalogue/" + relative_url
-            yield response.follow(book_url, callback=self.parse_book_page)
+            yield response.follow(book_url, callback=self.parse_book_page,headers={"User-Agent": self.user_agent_list[random.randint(0,len(self.user_agent_list)-1)]})
 
         # 切换到下一页，递归执行自身
         next_page = response.css("li.next a ::attr(href)").get()
@@ -43,7 +63,7 @@ class BookspiderSpider(scrapy.Spider):
                 next_page_url = "https://books.toscrape.com/" + next_page
             else:
                 next_page_url = "https://books.toscrape.com/catalogue/" + next_page
-            yield response.follow(next_page_url, callback=self.parse)
+            yield response.follow(next_page_url, callback=self.parse,headers={"User-Agent": self.user_agent_list[random.randint(0,len(self.user_agent_list)-1)]})
 
     def parse_book_page(self, response):
         """
