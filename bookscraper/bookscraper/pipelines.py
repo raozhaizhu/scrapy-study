@@ -53,17 +53,16 @@ class BookscraperPipeline:
         adapter["stars"] = STAR_MAP.get(stars_text_value, -1)
 
         return item
-    
+
+
 import mysql.connector
+
 
 class SaveToMySQLPipeline:
 
     def __init__(self):
         self.conn = mysql.connector.connect(
-            host = 'localhost',
-            user = 'root',
-            password = 'mysql',
-            database = 'books'
+            host="localhost", user="root", password="mysql", database="books"
         )
 
         self.cur = self.conn.cursor()
@@ -89,7 +88,7 @@ CREATE TABLE
   );
             """
         )
-    
+
     def process_item(self, item, spider):
         self.cur.execute(
             """
@@ -110,24 +109,25 @@ CREATE TABLE
         ) values(
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
         )          
-                    """,(
-        item['url'],
-        item['title'],
-        item['upc'],
-        item['product_type'],
-        item['price_excl_tax'],
-        item['price_incl_tax'],
-        item['tax'],
-        item['availability'],
-        item['num_reviews'],
-        item['stars'],
-        item['category'],
-        str(item.get('description', [''])[0]) 
-        ))
+                    """,
+            (
+                item["url"],
+                item["title"],
+                item["upc"],
+                item["product_type"],
+                item["price_excl_tax"],
+                item["price_incl_tax"],
+                item["tax"],
+                item["availability"],
+                item["num_reviews"],
+                item["stars"],
+                item["category"],
+                str(item.get("description", [""])[0]),
+            ),
+        )
         self.conn.commit()
         return item
-    
+
     def close_spider(self, spider):
         self.cur.close()
         self.conn.close()
-
